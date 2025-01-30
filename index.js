@@ -15,10 +15,11 @@
 */
 
 import { createSocket } from "dgram";
-import { readDNSQuery, createDNSResponse } from "./dnsutils.js";
+import { updateCache, fetchFromCache } from "./cache.js";
+import { readDNSQuery, createDNSResponse, extractIPAddressFromDNSResponse } from "./dnsutils.js";
 
 function getIP(domain) {
-  return 0;
+  return fetchFromCache(domain);
 }
 
 const DNS_PORT = 53;
@@ -27,10 +28,11 @@ const server = createSocket("udp4");
 
 server.on("message", (msg, rinfo) => {
   const dnsRequest = readDNSQuery(msg);
-  console.log("Received DNS Request: ", dnsRequest);
+  console.log("Received DNS Request for: ", dnsRequest.domain);
 
   let ip = getIP(dnsRequest.domain);
   if (ip) {
+    console.log("Using cache for: " + dnsRequest.domain);
     const dnsResponse = createDNSResponse(dnsRequest, ip);
     server.send(dnsResponse, rinfo.port, rinfo.address, (err) => {
       if (err) {
@@ -43,7 +45,9 @@ server.on("message", (msg, rinfo) => {
       if (err) console.error("Error forwarding query:", err);
     });
     client.on("message", (response) => {
-      console.log("Got a response from Google");
+      let returnedIP = extractIPAddressFromDNSResponse(response);
+      updateCache(dnsRequest.domain, returnedIP);
+      console.log("Got a response from Google: " + returnedIP);
       server.send(response, rinfo.port, rinfo.address, (err) => {
         if (err) console.error("Error sending response:", err);
       });
