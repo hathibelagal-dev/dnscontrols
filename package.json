@@ -1,5 +1,5 @@
 {
-  "name": "dnscontrols",
+  "name": "nyxshield",
   "version": "0.0.1",
   "description": "A simple library for working with DNS records",
   "main": "index.js",
