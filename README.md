@@ -15,6 +15,6 @@ npm start
 
 4. That's it. Experience freedom from annoying ads and trackers!
 
-**Note: **# NyxShield uses Google's DNS servers to resolve domains that are not to be blocked.
+Note: NyxShield uses Google's DNS servers to resolve domains that are not to be blocked.
 
 
