@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hathibelagal-dev/dnscontrols.git"
+    "url": "git+https://github.com/hathibelagal-dev/nyxshield.git"
   },
   "keywords": [
     "dns",
@@ -19,7 +19,7 @@
   "author": "Ashraff Hathibelagal",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/hathibelagal-dev/dnscontrols/issues"
+    "url": "https://github.com/hathibelagal-dev/nyxshield/issues"
   },
-  "homepage": "https://github.com/hathibelagal-dev/dnscontrols#readme"
+  "homepage": "https://github.com/hathibelagal-dev/nyxshield#readme"
 }
