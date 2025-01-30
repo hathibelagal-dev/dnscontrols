@@ -14,6 +14,8 @@
    limitations under the License.
 */
 
+import {SERVER_READY, CACHED, BLOCKED, FOUND} from "./strings.js";
+import {logger} from "./logger.js";
 import { createSocket } from "dgram";
 import { updateCache, fetchFromCache } from "./cache.js";
 import {
@@ -32,16 +34,15 @@ const server = createSocket("udp4");
 
 server.on("message", (msg, rinfo) => {
   const dnsRequest = readDNSQuery(msg);
-  console.log("Received DNS Request for: ", dnsRequest.domain);
 
   let ip = getIP(dnsRequest.domain);
   if (ip) {
-    console.log("Using cache for: " + dnsRequest.domain);
     const dnsResponse = createDNSResponse(dnsRequest, ip);
     server.send(dnsResponse, rinfo.port, rinfo.address, (err) => {
       if (err) {
         console.error("Error sending response:", err);
       }
+      logger.info(dnsRequest.domain + " : " +ip, CACHED);
     });
   } else {
     const client = createSocket("udp4");
@@ -49,9 +50,11 @@ server.on("message", (msg, rinfo) => {
       if (err) console.error("Error forwarding query:", err);
     });
     client.on("message", (response) => {
-      let returnedIP = extractIPAddressFromDNSResponse(response);
-      updateCache(dnsRequest.domain, returnedIP);
-      console.log("Got a response from Google: " + returnedIP);
+      let returnedIP = extractIPAddressFromDNSResponse(response);      
+      if(returnedIP) {
+        updateCache(dnsRequest.domain, returnedIP);
+        logger.info(dnsRequest.domain + " : " +returnedIP, FOUND);
+      }
       server.send(response, rinfo.port, rinfo.address, (err) => {
         if (err) console.error("Error sending response:", err);
       });
@@ -61,5 +64,5 @@ server.on("message", (msg, rinfo) => {
 });
 
 server.bind(DNS_PORT, () => {
-  console.log("Hathi DNS server listening on port " + DNS_PORT);
+  console.log(SERVER_READY + DNS_PORT);
 });
