@@ -15,6 +15,7 @@
 */
 
 const dnsCache = {};
+var nBlocks = 0;
 
 export const fetchFromCache = (domain) => {
   return dnsCache[domain];
@@ -27,3 +28,11 @@ export const updateCache = (domain, ip) => {
 export const countCachedItems = () => {
   return Object.keys(dnsCache).length;
 };
+
+export const updateNBlocks = () => {
+  nBlocks += 1;
+}
+
+export const getNBlocks = () => {
+  return nBlocks;
+}

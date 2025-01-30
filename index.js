@@ -14,10 +14,23 @@
    limitations under the License.
 */
 
-import { SERVER_READY, CACHED, BLOCKED, FOUND, NAME, LOCALHOST } from "./strings.js";
+import {
+  SERVER_READY,
+  CACHED,
+  BLOCKED,
+  FOUND,
+  NAME,
+  LOCALHOST,
+} from "./strings.js";
 import { logger } from "./logger.js";
 import { createSocket } from "dgram";
-import { updateCache, fetchFromCache, countCachedItems } from "./cache.js";
+import {
+  updateCache,
+  fetchFromCache,
+  countCachedItems,
+  getNBlocks,
+  updateNBlocks,
+} from "./cache.js";
 import {
   readDNSQuery,
   createDNSResponse,
@@ -26,7 +39,8 @@ import {
 import { hostsToBlock, readBlockList } from "./blocker.js";
 
 function getIP(domain) {
-  if(hostsToBlock[domain]) {
+  if (hostsToBlock[domain]) {
+    updateNBlocks();
     return LOCALHOST;
   }
   return fetchFromCache(domain);
@@ -80,5 +94,7 @@ server.bind(DNS_PORT, () => {
 });
 
 setInterval(() => {
-  logger.debug("Cache size: " + countCachedItems());
-}, 10000);
+  logger.debug(
+    "Cache size: " + countCachedItems() + " | Requests blocked: " + getNBlocks()
+  );
+}, 30000);
