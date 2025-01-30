@@ -14,22 +14,31 @@
    limitations under the License.
 */
 
-import {SERVER_READY, CACHED, BLOCKED, FOUND} from "./strings.js";
-import {logger} from "./logger.js";
+import { SERVER_READY, CACHED, BLOCKED, FOUND, NAME, LOCALHOST } from "./strings.js";
+import { logger } from "./logger.js";
 import { createSocket } from "dgram";
-import { updateCache, fetchFromCache } from "./cache.js";
+import { updateCache, fetchFromCache, countCachedItems } from "./cache.js";
 import {
   readDNSQuery,
   createDNSResponse,
   extractIPAddressFromDNSResponse,
 } from "./dnsutils.js";
+import { hostsToBlock, readBlockList } from "./blocker.js";
 
 function getIP(domain) {
+  if(hostsToBlock[domain]) {
+    return LOCALHOST;
+  }
   return fetchFromCache(domain);
 }
 
 const DNS_PORT = 53;
 const GOOGLE_DNS_IP = "8.8.8.8";
+
+logger.debug("Reading DNS blocklist");
+readBlockList();
+logger.debug("Finished reading DNS blocklist");
+logger.debug("Starting " + NAME + "...");
 const server = createSocket("udp4");
 
 server.on("message", (msg, rinfo) => {
@@ -42,7 +51,10 @@ server.on("message", (msg, rinfo) => {
       if (err) {
         console.error("Error sending response:", err);
       }
-      logger.info(dnsRequest.domain + " : " +ip, CACHED);
+      logger.info(
+        dnsRequest.domain + " : " + ip,
+        ip == LOCALHOST ? BLOCKED : CACHED
+      );
     });
   } else {
     const client = createSocket("udp4");
@@ -50,10 +62,10 @@ server.on("message", (msg, rinfo) => {
       if (err) console.error("Error forwarding query:", err);
     });
     client.on("message", (response) => {
-      let returnedIP = extractIPAddressFromDNSResponse(response);      
-      if(returnedIP) {
+      let returnedIP = extractIPAddressFromDNSResponse(response);
+      if (returnedIP) {
         updateCache(dnsRequest.domain, returnedIP);
-        logger.info(dnsRequest.domain + " : " +returnedIP, FOUND);
+        logger.info(dnsRequest.domain + " : " + returnedIP, FOUND);
       }
       server.send(response, rinfo.port, rinfo.address, (err) => {
         if (err) console.error("Error sending response:", err);
@@ -64,5 +76,9 @@ server.on("message", (msg, rinfo) => {
 });
 
 server.bind(DNS_PORT, () => {
-  console.log(SERVER_READY + DNS_PORT);
+  logger.debug(SERVER_READY + DNS_PORT);
 });
+
+setInterval(() => {
+  logger.debug("Cache size: " + countCachedItems());
+}, 10000);

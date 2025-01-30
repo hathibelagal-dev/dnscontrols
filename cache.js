@@ -21,5 +21,9 @@ export const fetchFromCache = (domain) => {
 };
 
 export const updateCache = (domain, ip) => {
-  dnsCache[domain] = ip;
+  dnsCache[domain] = ip; 
+};
+
+export const countCachedItems = () => {
+  return Object.keys(dnsCache).length;
 };
