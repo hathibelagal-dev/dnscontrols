@@ -16,7 +16,11 @@
 
 import { createSocket } from "dgram";
 import { updateCache, fetchFromCache } from "./cache.js";
-import { readDNSQuery, createDNSResponse, extractIPAddressFromDNSResponse } from "./dnsutils.js";
+import {
+  readDNSQuery,
+  createDNSResponse,
+  extractIPAddressFromDNSResponse,
+} from "./dnsutils.js";
 
 function getIP(domain) {
   return fetchFromCache(domain);

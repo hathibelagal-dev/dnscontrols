@@ -14,12 +14,12 @@
    limitations under the License.
 */
 
-const dnsCache = {}
+const dnsCache = {};
 
 export const fetchFromCache = (domain) => {
-    return dnsCache[domain];
-}
+  return dnsCache[domain];
+};
 
 export const updateCache = (domain, ip) => {
-    dnsCache[domain] = ip;
-}
+  dnsCache[domain] = ip;
+};

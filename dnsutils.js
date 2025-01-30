@@ -60,26 +60,28 @@ export const createDNSResponse = (query, ip) => {
 };
 
 export const extractIPAddressFromDNSResponse = (msg) => {
-    let offset = 12;
+  let offset = 12;
 
-    while (msg[offset] !== 0) offset++;
-    offset += 5;
+  while (msg[offset] !== 0) offset++;
+  offset += 5;
 
-    while (offset < msg.length) {
-        offset += 10;
-        const dataLength = msg.readUInt16BE(offset);
-        offset += 2;
+  while (offset < msg.length) {
+    offset += 10;
+    const dataLength = msg.readUInt16BE(offset);
+    offset += 2;
 
-        if (dataLength === 4) {
-            const ip = `${msg[offset++]}.${msg[offset++]}.${msg[offset++]}.${msg[offset++]}`;
-            return ip;
-        } else {
-            offset += dataLength;
-        }
+    if (dataLength === 4) {
+      const ip = `${msg[offset++]}.${msg[offset++]}.${msg[offset++]}.${
+        msg[offset++]
+      }`;
+      return ip;
+    } else {
+      offset += dataLength;
     }
+  }
 
-    return false;
-}
+  return false;
+};
 
 export const readDNSQuery = (msg) => {
   let offset = 0;
